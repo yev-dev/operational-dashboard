@@ -1,0 +1,24 @@
+{
+  "module": "runners.third_model",
+  "description": "Run third_model passing date strings via argv tokens or environment variables; concatenates provided values with ':'",
+  "noArgparse": true,
+  "inputs": {
+    "tokens": ["RUN_DATE", "COB_DATE", "START_DATE", "END_DATE"],
+    "envVars": ["RUN_DATE", "COB_DATE", "START_DATE", "END_DATE"]
+  },
+  "defaults": {
+    "RUN_DATE": "2025-01-01",
+    "COB_DATE": "2025-01-02",
+    "START_DATE": "2025-01-01",
+    "END_DATE": "2025-12-31"
+  },
+  "passMode": "argv tokens",
+  "run": {
+    "useCondaEnv": "${CONDA_ENV}",
+    "cwd": "${DASHBOARD_DIR}"
+  },
+  "examples": [
+    "python -m runners.third_model RUN_DATE:2025-01-01 COB_DATE:2025-01-02 START_DATE:2025-01-01 END_DATE:2025-12-31",
+    "RUN_DATE=2025-01-01 COB_DATE=2025-01-02 START_DATE=2025-01-01 END_DATE=2025-12-31 python -m runners.third_model"
+  ]
+}

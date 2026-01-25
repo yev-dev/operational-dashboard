@@ -1,0 +1,16 @@
+# Requirements for Operational Dashboard (dashboard/)
+# Minimal runtime dependencies. Install into the conda env used to run the app.
+
+streamlit>=1.20.0
+watchdog>=2.1.0
+# TOML loader for Python < 3.11 (the app uses tomllib when available)
+tomli>=2.0.1
+
+# Optional but recommended tools (install if you plan to use Jupyter integration):
+# Jupyter integration (optional):
+# If you want to start JupyterLab/Notebook from the dashboard UI, install this in the same env
+jupyterlab>=3.0.0
+
+# Notes:
+# - Python 3.11+ is recommended because the stdlib includes `tomllib`.
+# - If you pin versions for your environment, add exact pins here (e.g. streamlit==1.25.0).

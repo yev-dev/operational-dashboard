@@ -1,0 +1,29 @@
+# Ignore Python compiled files
+# Ignore Python compiled files
+*.pyc
+**/*.pyc
+__pycache__/
+
+# Byte-compiled / optimized / DLL files
+*.pyo
+*.pyd
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+.env/
+.envs/
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# End of file

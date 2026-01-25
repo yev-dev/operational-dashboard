@@ -1,0 +1,18 @@
+[server]
+# Use watchdog-based file watching for faster and broader change detection
+fileWatcherType = "watchdog"
+# Rerun the app automatically when the source files are saved
+runOnSave = true
+
+[dashboard]
+# Python package path that contains runner scripts (used for discovery and execution)
+# Example values:
+#   "runners"                  -> local package qf/dashboard/runners
+#   "myproj.tools.runners"     -> nested package path
+runners_package = [
+    "qf.runners",
+    "qf.tools"
+    ]
+dashboard_name = "Operational Dashboard"
+default_notebook_dir = "~"
+runs_db_name = "dashboard.db"
