@@ -151,8 +151,50 @@ def merge_log_tails(out_path: str | None, err_path: str | None, max_lines: int =
 SCRIPT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "runners")
 # The dashboard directory (parent of runners)
 DASHBOARD_DIR = os.path.dirname(SCRIPT_DIR)
-# Centralize logs to user home: ~/.dashboard/logs
-HOME_LOG_DIR = os.path.join(os.path.expanduser("~"), ".dashboard", "logs")
+def _resolve_dashboard_root() -> str:
+    """Resolve the dashboard runtime root directory.
+
+     Configuration precedence:
+        1. `.streamlit/config.toml` under the [dashboard] table with keys `path` and `name`.
+            - `path` may be absolute or relative (relative resolved against the dashboard package dir).
+            - `name` is the last path segment (folder name) under `path` (defaults to ".operational_dashboard").
+        2. Fallback to the user's home directory + `.{dashboard_name}` (default name ".operational_dashboard").
+
+    This function returns the resolved dashboard root (not the logs subdir)."""
+    try:
+        cfg = _get_streamlit_config() or {}
+        db = cfg.get("dashboard") if isinstance(cfg.get("dashboard"), dict) else None
+    except Exception:
+        db = None
+
+    # Accept several key names for compatibility: path or dashboard_path / name or dashboard_name
+    path_val = None
+    name_val = None
+    if db:
+        for k in ("path", "dashboard_path", "base_path"):
+            if db.get(k):
+                path_val = str(db.get(k))
+                break
+        for k in ("name", "dashboard_name"):
+            if db.get(k):
+                name_val = str(db.get(k))
+                break
+
+    if not name_val:
+        name_val = ".operational_dashboard"
+
+    if path_val:
+        expanded = os.path.expandvars(os.path.expanduser(path_val))
+        base_config_dir = expanded if os.path.isabs(expanded) else os.path.join(DASHBOARD_DIR, expanded)
+        dashboard_root = os.path.join(base_config_dir, name_val) if name_val else base_config_dir
+    else:
+        dashboard_root = os.path.join(os.path.expanduser("~"), name_val)
+
+    return os.path.abspath(dashboard_root)
+
+# Centralize logs under the resolved dashboard root (default: ~/.dashboard/logs)
+_DASHBOARD_ROOT = _resolve_dashboard_root()
+HOME_LOG_DIR = os.path.join(_DASHBOARD_ROOT, "logs")
 LOG_DIR = HOME_LOG_DIR
 LOG_FILE = os.path.join(LOG_DIR, "dashboard.log")
 UPLOADS_DIR = os.path.join(DASHBOARD_DIR, "uploads")
@@ -1251,7 +1293,8 @@ def render_logs_tab() -> None:
                     try:
                         col_fix1, col_fix2 = st.columns([1, 3])
                         with col_fix1:
-                            suggested = os.path.join(os.path.expanduser("~"), ".dashboard", "runs.db")
+                            # Suggest runs_db under the resolved dashboard root so it honors config.toml
+                            suggested = os.path.join(_DASHBOARD_ROOT, "runs.db")
                             if st.button("Fix it: write runs_db to config", key=_next_ui_key("fix_runs_db_btn")):
                                 cfg_dir = os.path.join(os.path.dirname(__file__), ".streamlit")
                                 cfg_path = os.path.join(cfg_dir, "config.toml")
